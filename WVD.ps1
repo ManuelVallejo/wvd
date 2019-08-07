@@ -11,4 +11,4 @@ $azureSubscriptionId = <value from Azure Subscription>
 Add-RdsAccount -DeploymentUrl $urlbroker
 
 # WVD Tenant Creation
-New-RdsTenant -Name Contoso -AadTenantId $aadTenantId -AzureSubscriptionId $azureSubscriptionId
+New-RdsTenant -Name 'AzureADName' -AadTenantId $aadTenantId -AzureSubscriptionId $azureSubscriptionId
