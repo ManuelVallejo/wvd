@@ -8,7 +8,24 @@ Import-Module -Name Microsoft.RDInfra.RDPowerShell
 $urlbroker = "https://rdbroker.wvd.microsoft.com"
 $aadTenantId = <value from Azure AD Tenant>
 $azureSubscriptionId = <value from Azure Subscription>
+$myTenantName = "<my-tenant-name>"
 Add-RdsAccount -DeploymentUrl $urlbroker
 
 # WVD Tenant Creation
-New-RdsTenant -Name 'AzureADName' -AadTenantId $aadTenantId -AzureSubscriptionId $azureSubscriptionId
+New-RdsTenant -Name $myTenantName -AadTenantId $aadTenantId -AzureSubscriptionId $azureSubscriptionId
+
+# WVD Service Principal
+Install-Module AzureAD
+Import-Module AzureAD
+
+$aadContext = Connect-AzureAD
+$svcPrincipal = New-AzureADApplication -AvailableToOtherTenants $true -DisplayName "Windows Virtual Desktop Svc Principal"
+$svcPrincipalCreds = New-AzureADApplicationPasswordCredential -ObjectId $svcPrincipal.ObjectId
+
+# Create a role assignment
+Add-RdsAccount -DeploymentUrl "https://rdbroker.wvd.microsoft.com"
+New-RdsRoleAssignment -RoleDefinitionName "RDS Owner" -ApplicationId $svcPrincipal.AppId -TenantName $myTenantName
+
+# Sign in with the service principal
+$creds = New-Object System.Management.Automation.PSCredential($svcPrincipal.AppId, (ConvertTo-SecureString $svcPrincipalCreds.Value -AsPlainText -Force))
+Add-RdsAccount -DeploymentUrl "https://rdbroker.wvd.microsoft.com" -Credential $creds -ServicePrincipal -AadTenantId $aadContext.TenantId.Guid
