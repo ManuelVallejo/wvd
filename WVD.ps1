@@ -1,6 +1,6 @@
 # Deploy Windows Virtual Desktop (WVD)
 
-# Install Powershell Module
+# Install WVD Powershell Module
 Install-Module -Name Microsoft.RDInfra.RDPowerShell
 Import-Module -Name Microsoft.RDInfra.RDPowerShell
  
@@ -14,10 +14,11 @@ Add-RdsAccount -DeploymentUrl $urlbroker
 # WVD Tenant Creation
 New-RdsTenant -Name $myTenantName -AadTenantId $aadTenantId -AzureSubscriptionId $azureSubscriptionId
 
-# WVD Service Principal
+# WVD Service Principal Powershell Module
 Install-Module AzureAD
 Import-Module AzureAD
 
+# Create Service Principal
 $aadContext = Connect-AzureAD
 $svcPrincipal = New-AzureADApplication -AvailableToOtherTenants $true -DisplayName "Windows Virtual Desktop Svc Principal"
 $svcPrincipalCreds = New-AzureADApplicationPasswordCredential -ObjectId $svcPrincipal.ObjectId
